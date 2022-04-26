@@ -1,24 +1,61 @@
-import React, { useContext } from 'react';
+import React, { useContext, useState } from 'react';
 import context from '../context/Context';
+import { executeFilters } from '../services';
 
 function Table() {
-  const { data, filterByName: { name: searchNameInput },
-    setFilterName } = useContext(context);
+  const [column, setColumnInput] = useState('population');
+  const [comparison, setComparisonInput] = useState('maior que');
+  const [valueInput, setValueInput] = useState(0);
+  const { data, filterByName: { name: searchNameInput }, filterByNumericValues,
+    setFilterName, setFilters } = useContext(context);
 
-  const planets = data.filter(
-    ({ name }) => name.toLowerCase().includes(searchNameInput),
-  );
+  const planets = executeFilters(data, searchNameInput, filterByNumericValues);
 
-  const handleFilterNameChange = ({ target: { value } }) => setFilterName(value);
+  const handleFilterName = ({ target: { value } }) => setFilterName(value);
+  const handleFilterColumn = ({ target: { value } }) => setColumnInput(value);
+  const handleFilterComparison = ({ target: { value } }) => setComparisonInput(value);
+  const handleFilterValue = ({ target: { value } }) => setValueInput(value);
+  const handleFilterButton = () => setFilters([
+    ...filterByNumericValues, { column, comparison, value: valueInput },
+  ]);
 
   return (
     <section>
-      <input
-        type="text"
-        value={ searchNameInput }
-        onChange={ handleFilterNameChange }
-        data-testid="name-filter"
-      />
+      <section>
+        <input
+          type="text"
+          value={ searchNameInput }
+          onChange={ handleFilterName }
+          data-testid="name-filter"
+        />
+      </section>
+      <section>
+        <select onChange={ handleFilterColumn } data-testid="column-filter">
+          <option>population</option>
+          <option>orbital_period</option>
+          <option>diameter</option>
+          <option>rotation_period</option>
+          <option>surface_water</option>
+        </select>
+        <select onChange={ handleFilterComparison } data-testid="comparison-filter">
+          <option>maior que</option>
+          <option>menor que</option>
+          <option>igual a</option>
+        </select>
+        <input
+          type="number"
+          value={ valueInput }
+          onChange={ handleFilterValue }
+          data-testid="value-filter"
+        />
+        <button
+          type="button"
+          onClick={ handleFilterButton }
+          data-testid="button-filter"
+        >
+          Filtrar
+        </button>
+      </section>
       <table>
         <thead>
           <tr>

@@ -6,17 +6,20 @@ import usePlanets from '../hooks/usePlanets';
 function Provider({ children }) {
   const [data] = usePlanets();
   const [name, setFilterName] = useState('');
+  const [filterByNumericValues, setFilters] = useState([]);
 
-  const value = {
+  const contextValue = {
     data,
     filterByName: {
       name,
     },
+    filterByNumericValues,
     setFilterName,
+    setFilters,
   };
 
   return (
-    <context.Provider value={ value }>
+    <context.Provider value={ contextValue }>
       {children}
     </context.Provider>
   );
