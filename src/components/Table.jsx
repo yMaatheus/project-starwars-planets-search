@@ -1,37 +1,42 @@
 import React, { useContext, useEffect, useState } from 'react';
 import context from '../context/Context';
 import { executeFilters } from '../services';
+import Button from '../utils/components/Button';
 
 function Table() {
-  const { columnsList, data, filterByName, filterByNumericValues,
+  const { columnsList, data, filterByName, filterByNumericValues: filters,
     setFilterName, setFilters } = useContext(context);
   const { name: searchNameInput } = filterByName;
 
   const [columnInput, setColumnInput] = useState('');
-  const [comparison, setComparisonInput] = useState('maior que');
+  const [comparisonInput, setComparisonInput] = useState('maior que');
   const [valueInput, setValueInput] = useState(0);
 
   const [planets, setPlanets] = useState([]);
   const [columns, setColumns] = useState([]);
 
   useEffect(() => {
-    const generateColumns = () => filterByNumericValues.reduce((acc, { column }) => (
+    const generateColumns = () => filters.reduce((acc, { column }) => (
       acc.includes(column) && acc.filter((item) => item !== column)
     ), columnsList);
 
-    setPlanets(executeFilters(data, searchNameInput, filterByNumericValues));
+    setPlanets(executeFilters(data, searchNameInput, filters));
     const columnsArray = generateColumns();
     setColumns(columnsArray);
     setColumnInput(columnsArray[0]);
-  }, [columnsList, data, filterByNumericValues, searchNameInput]);
+  }, [columnsList, data, filters, searchNameInput]);
 
   const handleFilterName = ({ target: { value } }) => setFilterName(value);
   const handleFilterColumn = ({ target: { value } }) => setColumnInput(value);
   const handleFilterComparison = ({ target: { value } }) => setComparisonInput(value);
   const handleFilterValue = ({ target: { value } }) => setValueInput(value);
   const handleFilterButton = () => setFilters([
-    ...filterByNumericValues, { column: columnInput, comparison, value: valueInput },
+    ...filters, { column: columnInput, comparison: comparisonInput, value: valueInput },
   ]);
+  const handleRemoveFilter = ({ target: { id } }) => (
+    setFilters(filters.filter(({ column }) => id !== column))
+  );
+  const handleRemoveAllFilters = () => setFilters([]);
 
   return (
     <section>
@@ -59,13 +64,24 @@ function Table() {
           onChange={ handleFilterValue }
           data-testid="value-filter"
         />
-        <button
-          type="button"
-          onClick={ handleFilterButton }
-          data-testid="button-filter"
-        >
-          Filtrar
-        </button>
+        <Button value="Filtrar" click={ handleFilterButton } testId="button-filter" />
+        <Button
+          value="Remover Filtragens"
+          click={ handleRemoveAllFilters }
+          testId="button-remove-filters"
+        />
+      </section>
+      <section>
+        { filters.map(({ column, comparison, value }, index) => (
+          <section key={ index } data-testid="filter">
+            <span>{`${column} ${comparison} ${value}`}</span>
+            <Button
+              id={ column }
+              value="X"
+              click={ (event) => { handleRemoveFilter(event); } }
+            />
+          </section>
+        ))}
       </section>
       <table>
         <thead>
