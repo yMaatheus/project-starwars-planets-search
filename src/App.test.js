@@ -35,7 +35,7 @@ const mockFetch = () => {
     }));
 };
 
-describe.only('1 - Faça uma requisição para o endpoint `/planets` da API de Star Wars e preencha uma tabela com os dados retornados, com exceção dos da coluna `residents`', () => {
+describe('1 - Faça uma requisição para o endpoint `/planets` da API de Star Wars e preencha uma tabela com os dados retornados, com exceção dos da coluna `residents`', () => {
   beforeAll(mockFetch);
   beforeEach(cleanup);
 
@@ -91,7 +91,7 @@ describe.only('1 - Faça uma requisição para o endpoint `/planets` da API de S
   });
 });
 
-describe.only('2 - Filtre a tabela através de um texto, inserido num *campo de texto*, exibindo somente os planetas cujos nomes incluam o texto digitado', () => {
+describe('2 - Filtre a tabela através de um texto, inserido num *campo de texto*, exibindo somente os planetas cujos nomes incluam o texto digitado', () => {
   beforeAll(mockFetch);
   beforeEach(cleanup);
 
@@ -291,7 +291,7 @@ describe('3 - Crie um filtro para valores numéricos', () => {
     fireEvent.change(await screen.findByTestId(COMPARISON_FILTER_SELECTOR), { target: { value: 'igual a' } });
     fireEvent.change(await screen.findByTestId(VALUE_FILTER_SELECTOR), { target: { value: '200000' } });
     fireEvent.click(await screen.findByTestId(BUTTON_FILTER_SELECTOR));
-
+    
     expect(await screen.findAllByRole(ROW_ROLE_SELECTOR)).toHaveLength(EQUALS_FILTERED_ROWS);
   });
 });

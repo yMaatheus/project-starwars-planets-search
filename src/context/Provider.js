@@ -7,8 +7,11 @@ function Provider({ children }) {
   const [data] = usePlanets();
   const [name, setFilterName] = useState('');
   const [filterByNumericValues, setFilters] = useState([]);
+  const columnsList = ['population', 'orbital_period', 'diameter', 'rotation_period',
+    'surface_water'];
 
   const contextValue = {
+    columnsList,
     data,
     filterByName: {
       name,

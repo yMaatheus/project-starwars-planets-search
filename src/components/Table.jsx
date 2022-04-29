@@ -1,22 +1,36 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import context from '../context/Context';
 import { executeFilters } from '../services';
 
 function Table() {
-  const [column, setColumnInput] = useState('population');
+  const { columnsList, data, filterByName, filterByNumericValues,
+    setFilterName, setFilters } = useContext(context);
+  const { name: searchNameInput } = filterByName;
+
+  const [columnInput, setColumnInput] = useState('');
   const [comparison, setComparisonInput] = useState('maior que');
   const [valueInput, setValueInput] = useState(0);
-  const { data, filterByName: { name: searchNameInput }, filterByNumericValues,
-    setFilterName, setFilters } = useContext(context);
 
-  const planets = executeFilters(data, searchNameInput, filterByNumericValues);
+  const [planets, setPlanets] = useState([]);
+  const [columns, setColumns] = useState([]);
+
+  useEffect(() => {
+    const generateColumns = () => filterByNumericValues.reduce((acc, { column }) => (
+      acc.includes(column) && acc.filter((item) => item !== column)
+    ), columnsList);
+
+    setPlanets(executeFilters(data, searchNameInput, filterByNumericValues));
+    const columnsArray = generateColumns();
+    setColumns(columnsArray);
+    setColumnInput(columnsArray[0]);
+  }, [columnsList, data, filterByNumericValues, searchNameInput]);
 
   const handleFilterName = ({ target: { value } }) => setFilterName(value);
   const handleFilterColumn = ({ target: { value } }) => setColumnInput(value);
   const handleFilterComparison = ({ target: { value } }) => setComparisonInput(value);
   const handleFilterValue = ({ target: { value } }) => setValueInput(value);
   const handleFilterButton = () => setFilters([
-    ...filterByNumericValues, { column, comparison, value: valueInput },
+    ...filterByNumericValues, { column: columnInput, comparison, value: valueInput },
   ]);
 
   return (
@@ -31,11 +45,8 @@ function Table() {
       </section>
       <section>
         <select onChange={ handleFilterColumn } data-testid="column-filter">
-          <option>population</option>
-          <option>orbital_period</option>
-          <option>diameter</option>
-          <option>rotation_period</option>
-          <option>surface_water</option>
+          { columns.map((columnName, index) => (
+            <option key={ index }>{columnName}</option>))}
         </select>
         <select onChange={ handleFilterComparison } data-testid="comparison-filter">
           <option>maior que</option>
