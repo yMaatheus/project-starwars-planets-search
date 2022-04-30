@@ -1,3 +1,6 @@
+export const orderDefault = (planets) => (
+  planets.sort((a, b) => a.name.localeCompare(b.name)));
+
 export const executeFilters = (data, searchNameInput, filters) => {
   let planets = data.filter(({ name }) => name.toLowerCase().includes(searchNameInput));
   if (filters.length > 0) {
@@ -16,7 +19,6 @@ export const executeFilters = (data, searchNameInput, filters) => {
       });
     }, planets);
   }
+  orderDefault(planets);
   return planets;
 };
-
-export const test = '';

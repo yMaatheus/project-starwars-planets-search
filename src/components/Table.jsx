@@ -10,9 +10,10 @@ import SearchName from './SearchName';
 import TablePlanets from './TablePlanets';
 
 function Table() {
-  const { columnsList, data, filterByName,
-    filterByNumericValues: filters } = useContext(context);
+  const { columnsList, data, filterByName, order,
+    filterByNumericValues: filters, setOrderColumn, setOrderSort } = useContext(context);
   const { name: searchNameInput } = filterByName;
+  const { column, sort } = order;
 
   const [columnInput, setColumnInput] = useState('');
   const [comparisonInput, setComparisonInput] = useState('maior que');
@@ -21,20 +22,27 @@ function Table() {
   const [planets, setPlanets] = useState([]);
   const [columns, setColumns] = useState([]);
 
-  const [columnSort, setColumnSort] = useState('');
-
   useEffect(() => {
-    const generateColumns = () => filters.reduce((acc, { column }) => (
-      acc.includes(column) && acc.filter((item) => item !== column)
+    const generateColumns = () => filters.reduce((acc, { column: columnName }) => (
+      acc.includes(columnName) && acc.filter((item) => item !== columnName)
     ), columnsList);
 
     setPlanets(executeFilters(data, searchNameInput, filters));
-    const columnsArray = generateColumns();
-    setColumns(columnsArray);
-    setColumnInput(columnsArray[0]);
-  }, [columnsList, data, filters, searchNameInput]);
 
-  const handleSortColumn = ({ target: { value } }) => setColumnSort(value);
+    const columnsArray = generateColumns();
+    setColumnInput(columnsArray[0]);
+    setColumns(columnsArray);
+  }, [column, columnsList, data, filters, searchNameInput, sort]);
+
+  const handleOrderColumn = ({ target: { value } }) => setOrderColumn(value);
+  const handleOrderSort = ({ target: { value } }) => setOrderSort(value);
+  const handleOrderButton = () => {
+    const unknownPlanets = planets.filter((planet) => planet[column] === 'unknown');
+    const otherPlanets = planets.filter((planet) => planet[column] !== 'unknown');
+    otherPlanets.sort((a, b) => (sort === 'ASC'
+      ? +a[column] - +b[column] : +b[column] - +a[column]));
+    setPlanets([...otherPlanets, ...unknownPlanets]);
+  };
 
   return (
     <section>
@@ -55,7 +63,7 @@ function Table() {
         <ResetFiltersButton />
       </section>
       <section>
-        <select onChange={ handleSortColumn } data-testid="column-sort">
+        <select onChange={ handleOrderColumn } data-testid="column-sort">
           { columnsList.map((columnName, index) => (
             <option key={ index }>{columnName}</option>
           ))}
@@ -66,6 +74,8 @@ function Table() {
             id="ASC"
             name="sort"
             value="ASC"
+            checked={ sort === 'ASC' }
+            onChange={ handleOrderSort }
             data-testid="column-sort-input-asc"
           />
           Ascendente
@@ -76,11 +86,13 @@ function Table() {
             id="DESC"
             name="sort"
             value="DESC"
+            checked={ sort === 'DESC' }
+            onChange={ handleOrderSort }
             data-testid="column-sort-input-desc"
           />
           Descendente
         </label>
-        <Button value="Ordenar" testId="column-sort-button" />
+        <Button value="Ordenar" click={ handleOrderButton } testId="column-sort-button" />
       </section>
       <Filters />
       <TablePlanets planets={ planets } />
