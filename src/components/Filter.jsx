@@ -1,12 +1,29 @@
-import React from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
+import context from '../context/Context';
 
-function FilterForm(
-  { valueInput, columns, setColumnInput, setComparisonInput, setValueInput },
-) {
+function FilterForm(props) {
+  const { columnsList, filterByNumericValues: filters } = useContext(context);
+  const { valueInput, setColumnInput, setComparisonInput,
+    setValueInput } = props;
+
+  const [columns, setColumns] = useState([]);
+
+  useEffect(() => {
+    const generateColumns = () => filters.reduce((acc, { column: columnName }) => (
+      acc.includes(columnName) && acc.filter((item) => item !== columnName)
+    ), columnsList);
+
+    const columnsArray = generateColumns();
+
+    setColumnInput(columnsArray[0]);
+    setColumns(columnsArray);
+  }, [columnsList, filters, setColumnInput]);
+
   const handleFilterColumn = ({ target: { value } }) => setColumnInput(value);
   const handleFilterComparison = ({ target: { value } }) => setComparisonInput(value);
   const handleFilterValue = ({ target: { value } }) => setValueInput(value);
+
   return (
     <>
       <select onChange={ handleFilterColumn } data-testid="column-filter">
